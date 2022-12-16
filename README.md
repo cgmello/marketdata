@@ -14,9 +14,10 @@ To run this project you need [Golang release 1.18 or later](https://go.dev/doc/d
 
 ```bash
 # clone the repository
-git clone https://github.com/cgmello/marketadata
+git clone https://github.com/cgmello/marketdata.git
 
 # run
+cd marketdata
 make start
 ```
 
