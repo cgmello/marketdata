@@ -8,7 +8,7 @@ The quick goal of this project is to develop a [VWAP (Volume-Weighted Average Pr
 ## Marketdata
 The big goal of this project would be to create a scalable market data platform to collect real-time data and calculate indicators. We created an architecture that should be ready to evolve, easy to maintain and already organized to become a production platform.
 
-### Usage
+### Usage (Linux and MacOS)
 
 To run this project you need [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Golang 1.18 or newer](https://go.dev/doc/devel/release#policy):
 
@@ -27,7 +27,31 @@ To run the unity and integration tests:
 make tests
 ```
 
-----
+### For Windows users
+
+To use **make** you need to install [Chocolatey](https://chocolatey.org/install) and then run ```choco install make```. 
+
+If not, you can run the project directly:
+
+```bash
+# clone the repository
+git clone https://github.com/cgmello/marketdata.git
+
+# run
+cd marketdata
+cd cmd/coinbase
+go mod tidy
+go run .
+```
+
+And to run the tests:
+
+```bash
+go test -v -cover
+cd ../../internal/indicator 
+go mod tidy
+go test -v -cover
+```
 
 ## Features
 
