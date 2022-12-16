@@ -10,13 +10,14 @@ The big goal of this project would be to create a scalable market data platform 
 
 ### Usage
 
-To run this project you need [Golang release 1.18 or later](https://go.dev/doc/devel/release#policy):
+To run this project you need [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Golang 1.18 or newer](https://go.dev/doc/devel/release#policy):
 
 ```bash
 # clone the repository
-git clone https://github.com/cgmello/marketadata
+git clone https://github.com/cgmello/marketdata.git
 
 # run
+cd marketdata
 make start
 ```
 
@@ -53,47 +54,46 @@ We made some assumptions when implementing this code:
 
 - The first 200 updates will have less than 200 data points included in the calculation
 - In order to gain performance and storage efficiency we always keep the current sums of ```price*quantity```and ```quantity``` for each trading pair, so that when a new Point(p,q) arrives, we remove the oldest ```p0*q0``` value from the numerator and ```q0``` value from the denominator, and add the new related values ```p*q``` and ```q```
---
-    > VWAP equation = sum(price*quantity) / sum(quantity)
-- We were aware of the [Coinbase's websocket feed rate limits](https://docs.cloud.coinbase.com/exchange/docs/websocket-rate-limits) but we have only 1 websocket connection at a time and and we only send 1 subscription message, so it is not an issue
-- In [Coinbase's websocket feed best practices](https://docs.cloud.coinbase.com/exchange/docs/websocket-best-practices) they suggest that we should split the connections for each subscription, but for efficiency purposes we choose to run only one connection. Maybe we should make some tests to check if it would be necessary to split the connections when we have a big number of trading pairs.
-*- from Coinbase:*
-    > *Spread subscriptions (especially full channel subscriptions) over more than one websocket client connection. For example, do not subscribe to BTC-USD and ETH-USD on the same channel if possible. Instead, open up two separate websocket connections to help load balance those inbound messages across separate connections.*
+> VWAP equation = sum(price*quantity) / sum(quantity)
+- We were aware of the [Coinbase's websocket feed rate limits](https://docs.cloud.coinbase.com/exchange/docs/websocket-rate-limits) but we have only 1 websocket connection at a time and we only send 1 subscription message, so it is not an issue
+- In [Coinbase's websocket feed best practices](https://docs.cloud.coinbase.com/exchange/docs/websocket-best-practices) they suggest that we should split the connections for each subscription, but for efficiency purposes we choose to run only 1 connection. Maybe we should make some tests to check if it would be necessary to split the connections when we have a big number of trading pairs
 - We choose not to Authenticate as it is optional and because we are not executing trades
 - We set the compression settings ON when using the Gorilla websockets to achieve lower bandwidth consumption
-- We used the original channel, not the **_batch** one because we need real-time values
+- We used the original channel, not the **_batch** one, because we need real-time values
 
 #### Folder structure
 
 We suggested the following directory structure to handle the complete version of the project, so that we start with a production ready folder organization from day-1.
 
-> **/api** - all kind of REST, Websockets and GRPC public (and private) API's specifications and related documents such as Postman's or Thunder Client's collections and online documentations such as Swaggo
+> **/** - in the root we have the Makefile and other administrative stuff. We could have here the docker-compose yaml file for example.
 
-> **/cmd** - the main folder of the project. Should have the apps inside it such as the /coinbase for our POC. In each app we can have the main file, auxiliar code, api routes and the test files (e.g. main_test.go). Here we store our microservices and BFF (backend-for-frontend) codes
+> **/api** - all kind of REST, Websockets and GRPC public (and private) API's specifications and related documents such as Postman's or Thunder Client's collections and online documentations such as Swaggo. We didn't implemented this for now.
 
-> **/config** - configuration module. Here we can set the config to access different resources depending upon the environment:
+> **/cmd** - the main folder of the project. Here we have the apps. In each app we can have the main file, auxiliar code, api routes, Dockerfile and test files (e.g. main_test.go). Here we can store our microservices and BFF (backend-for-frontend) codes. We have our coinbase app stored here.
+
+> **/config** - configuration module. We use hard-coded values for now. Here we could set the config to access different resources depending upon the environment:
     - *.env* file for local development;
     - SQL/NoSQL databases or [Kubernetes etcd](https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/) for non-sensitive data; and
     - [AWS Secrets Manager](https://aws.amazon.com/pt/secrets-manager/), [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) or some vault such as [HashiCorp](https://www.vaultproject.io) to store more sensitive information like credentials, tokens and passwords
 
-> **/deployments** - Kubernetes deployments and services files, Terraform files, Helm chart files, etc.
+> **/deployments** - Kubernetes deployments and services files, Terraform files, Helm chart files, etc. We didn't implemented this for now.
 
-> **/internal** - every code that are common to our apps, but cannot be imported from external projects (we can have a /pkg folder for that) such as the /indicator (e.g. for VWAP), the /lib  (e.g. for outputs) and the /model (e.g. for coinbase structs) folders. In the /lib folder we can put all the adapters that we should need to access external resources such as:
+> **/internal** - every code that are common to our apps, but cannot be imported from external projects (we can have a /pkg folder for that) such as the /indicator (our VWAP), the /lib  (our stdout output) and the /model (our coinbase structs) folders. In the /lib folder we can put all the adapters that we should need to access external resources such as:
     - database adapters for MySQL, PostgreSQL, Timestream, InfluxDB, DynamoDB, Redis, etc.
     - stream adapters for Kinesis Data Streams, Data Firehose, etc.
     - blockchain adapters for our smart contracts
     - for S3 buckets or similar long-term storage
-    - for external adapters such as e-mail providers
+    - for external adapters such as e-mail providers.
 
-> **/scripts** - shell scripts or cronjobs that are not running on Github Actions or Kubernetes
+> **/scripts** - shell scripts or cronjobs that are not running on Github Actions or Kubernetes. It's empty for now.
 
-> **/tools** - tools such as database migration sql scripts
+> **/tools** - tools such as database migration sql scripts. It's empty for now.
 
-> **/website** - UI frontend apps that uses the backend code
+> **/website** - UI frontend apps that uses the backend code. We don't have any UI for now.
 
 ## Other development features
 
-Some other features that we uses on the development process, but that are not integrated automatically (yet):
+Some other features that we used on the development process, but that are not integrated automatically (yet):
 
 - We run [Staticcheck](https://staticcheck.io) manually on our terminal as a linter for the Go programming language, besides the lint plugin that also checks our code on real-time on Visual Source Code, in order to improve the overall quality of code
 - We run [Snyk CLI](https://docs.snyk.io/snyk-cli/getting-started-with-the-cli) manually to scan our project against known vulnerabilities
@@ -104,6 +104,5 @@ From this VWAP calculation engine quick project that was a POC to validate our a
 
 1. Implement some **DevOps** workflow to handle all kind of automatic tests and deployments for our project. We could use Github Actions for CI/CD pipelines or other similar tools like Jenkins
 2. Create a **Kubernetes cluster** to run our microservices and some tools like Prometheus, Grafana and Alerts to have a more high availability, secure and monitored system
-3. Design an **Event-driven** or Event-source architectures for example, to run our microservices using the best practices for system designing. We could use for example a Kinesis Data Stream instance to receive the real-time data, microservices to enrich and process data, microservices to store data in SQL/NoSQL databases and cache-like databases such as Redis, send data to a SQS/SNS solution to work as brokers and publish/subscribe options, implement public (or private) APIs to give access to the datalake to the own company and/or clients, etc
-4. Generate domains for our different environments (develop, staging, production). Configure AWS Route53 to handle our routes and AWS Certification Manager to use in our Load Balancers that handles our Kubernetes services. Enable AWS WAF for firewall protection.
-5. And so on. That's it. Thank you for reading.
+3. Design an **Event-driven** or Event-source architectures for example, to run our microservices using the best practices for system designing. We could use for example a Kinesis Data Stream instance to receive the real-time data, microservices to enrich and process data, microservices to store data in SQL/NoSQL databases and cache-like databases such as Redis, send data to a SQS/SNS solution to work as brokers and publish/subscribe options, implement public (or private) APIs to give access to the datalake to the own company and/or clients, etc.
+4. Generate domains for our different environments (develop, staging, production). Configure AWS Route 53 to handle our routes and AWS Certification Manager to use https in our Load Balancers that handles our Kubernetes services. Enable AWS WAF for firewall protection. And so on.
