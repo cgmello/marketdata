@@ -27,6 +27,8 @@ To run the unity and integration tests:
 make tests
 ```
 
+Hint: to install Go on Ubuntu run ```sudo snap install go --classic```
+
 ### For Windows users
 
 To use **make** you need to install [Chocolatey](https://chocolatey.org/install) and then run ```choco install make```. 
