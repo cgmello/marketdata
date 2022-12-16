@@ -10,7 +10,7 @@ The big goal of this project would be to create a scalable market data platform 
 
 ### Usage
 
-To run this project you need [Golang release 1.18 or later](https://go.dev/doc/devel/release#policy):
+To run this project you need [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Golang 1.18 or newer](https://go.dev/doc/devel/release#policy):
 
 ```bash
 # clone the repository
